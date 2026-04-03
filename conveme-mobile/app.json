@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "ConVeMe",
+    "slug": "conveme-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "conveme",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a0060"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nomanches.conveme"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a0060"
+      },
+      "package": "com.nomanches.conveme"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#cc55ff"
+        }
+      ]
+    ]
+  }
+}
