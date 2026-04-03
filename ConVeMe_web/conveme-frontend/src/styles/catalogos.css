@@ -1,0 +1,247 @@
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import UserGreeting from '../components/ui/UserGreeting';
+import ModalEscuela from '../components/catalogos/ModalEscuela'; // 👈 Importamos tu Modal
+import {
+    Plus, ChevronDown, School, Users, UserCheck,
+    CreditCard, Calendar, ChevronRight
+} from 'lucide-react';
+
+// Importamos el archivo de estilos limpio
+import '../styles/Catalogos.css';
+
+/* ── Tab config ── */
+const TABS = [
+    { id: 'escuelas',  label: 'Escuelas',          icon: <School     size={16} /> },
+{ id: 'empleados', label: 'Empleados',         icon: <Users      size={16} /> },
+{ id: 'vendedores',label: 'Vendedores',        icon: <UserCheck  size={16} /> },
+{ id: 'cuentas',   label: 'Cuentas Bancarias', icon: <CreditCard size={16} /> },
+{ id: 'eventos',   label: 'Eventos',           icon: <Calendar   size={16} /> },
+];
+
+const COLUMNAS: Record<string, { key: string; label: string }[]> = {
+    escuelas:  [
+        { key: 'id',        label: 'ID'       },
+        { key: 'nombre',    label: 'Nombre'   },
+        { key: 'siglas',    label: 'Siglas'   },
+        { key: 'municipio', label: 'Municipio'},
+        { key: 'estado',    label: 'Estado'   },
+    ],
+    empleados: [
+        { key: 'id',       label: 'ID'             },
+        { key: 'nombre',   label: 'Nombre Completo'},
+        { key: 'puesto',   label: 'Puesto'         },
+        { key: 'telefono', label: 'Teléfono'       },
+        { key: 'email',    label: 'Email'          },
+    ],
+    vendedores: [
+        { key: 'id',       label: 'ID'               },
+        { key: 'nombre',   label: 'Nombre Completo'  },
+        { key: 'escuela',  label: 'Escuela Asignada' },
+        { key: 'instagram',label: 'Instagram'        },
+        { key: 'comisiones',label:'Comisiones'       },
+    ],
+    cuentas: [
+        { key: 'id',       label: 'ID'       },
+        { key: 'vendedor', label: 'Vendedor' },
+        { key: 'banco',    label: 'Banco'    },
+        { key: 'titular',  label: 'Titular'  },
+        { key: 'clabe',    label: 'CLABE'    },
+    ],
+    eventos: [
+        { key: 'id',      label: 'ID'           },
+        { key: 'nombre',  label: 'Nombre Evento'},
+        { key: 'fechas',  label: 'Fechas'       },
+        { key: 'escuela', label: 'Escuela Sede' },
+        { key: 'estado',  label: 'Estado'       },
+    ],
+};
+
+export default function Catalogos() {
+    const [tabActiva, setTabActiva]     = useState('escuelas');
+    const [dropOpen,  setDropOpen]      = useState(false);
+    const [addOpen,   setAddOpen]       = useState(false);
+
+    // 👇 Estado para controlar el Modal de Escuelas
+    const [isModalEscuelaOpen, setIsModalEscuelaOpen] = useState(false);
+
+    const dropRef = useRef<HTMLDivElement>(null);
+
+    const tabActual = TABS.find(t => t.id === tabActiva)!;
+    const columnas  = COLUMNAS[tabActiva] ?? [];
+
+    // 👇 Función temporal para guardar (Simula el Axios)
+    const handleGuardarEscuela = async (data: any) => {
+        console.log("Datos de la escuela:", data);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        alert(`¡${data.nombre} guardada exitosamente! (Simulado)`);
+    };
+
+    return (
+        <>
+        <div className="cat-root">
+        <UserGreeting />
+
+        {/* ── Page header ── */}
+        <div className="cat-header">
+        <div className="cat-header-text">
+        <h1>Catálogos</h1>
+        <p>Administra los registros de cada categoría del sistema.</p>
+        </div>
+
+        {/* Add button with dropdown list */}
+        <div className="cat-add-wrap" ref={dropRef}>
+        <motion.button
+        className="cat-add-btn"
+        onClick={() => setAddOpen(v => !v)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.97 }}
+        >
+        <Plus size={18} />
+        Añadir registro
+        <ChevronDown size={15} style={{ transform: addOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+        </motion.button>
+
+        <AnimatePresence>
+        {addOpen && (
+            <motion.div
+            className="cat-add-dropdown"
+            initial={{ opacity: 0, y: -8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0,  scale: 1    }}
+            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            transition={{ duration: 0.18 }}
+            >
+            <p className="cat-add-drop-header">¿Qué deseas registrar?</p>
+            {TABS.map(tab => (
+                <button
+                key={tab.id}
+                className="cat-add-drop-item"
+                onClick={() => {
+                    setTabActiva(tab.id);
+                    setAddOpen(false);
+                    // 👇 LÓGICA MÁGICA: Si escoge escuelas, abre el modal
+                    if (tab.id === 'escuelas') {
+                        setIsModalEscuelaOpen(true);
+                    } else {
+                        alert(`El formulario de ${tab.label} está en construcción 🚧`);
+                    }
+                }}
+                >
+                <span className="cat-add-drop-icon">{tab.icon}</span>
+                <span>
+                <span className="cat-add-drop-label">{tab.label}</span>
+                <span className="cat-add-drop-sub" style={{ display:'block' }}>
+                Nuevo registro
+                </span>
+                </span>
+                <ChevronRight size={13} style={{ color:'rgba(26,0,96,0.25)', marginLeft:'auto' }} />
+                </button>
+            ))}
+            </motion.div>
+        )}
+        </AnimatePresence>
+        </div>
+        </div>
+
+        {/* ── Category selector dropdown ── */}
+        <div className="cat-selector-wrap">
+        <button
+        className="cat-selector-btn"
+        onClick={() => setDropOpen(v => !v)}
+        >
+        <span className="cat-selector-icon">{tabActual.icon}</span>
+        <span className="cat-selector-label">
+        <span className="cat-selector-sublabel">Categoría activa</span>
+        <span className="cat-selector-name">{tabActual.label}</span>
+        </span>
+        <ChevronDown size={18} className={`cat-chevron${dropOpen ? ' open' : ''}`} />
+        </button>
+
+        <AnimatePresence>
+        {dropOpen && (
+            <motion.div
+            className="cat-dropdown"
+            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0,  scale: 1    }}
+            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            transition={{ duration: 0.18 }}
+            >
+            {TABS.map(tab => (
+                <button
+                key={tab.id}
+                className={`cat-drop-item${tabActiva === tab.id ? ' active' : ''}`}
+                onClick={() => {
+                    setTabActiva(tab.id);
+                    setDropOpen(false);
+                }}
+                >
+                <span className="cat-drop-item-icon">{tab.icon}</span>
+                <span className="cat-drop-item-label">{tab.label}</span>
+                <ChevronRight size={14} className="cat-drop-check" />
+                </button>
+            ))}
+            </motion.div>
+        )}
+        </AnimatePresence>
+        </div>
+
+        {/* ── Main table card ── */}
+        <AnimatePresence mode="wait">
+        <motion.div
+        key={tabActiva}
+        className="cat-card"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0  }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.25, ease: [0.22,1,0.36,1] }}
+        >
+        {/* Card header */}
+        <div className="cat-card-header">
+        <div className="cat-card-title">
+        <span className="cat-card-title-icon">{tabActual.icon}</span>
+        {tabActual.label}
+        </div>
+        <span className="cat-count-badge">0 registros</span>
+        </div>
+
+        {/* Table with horizontal scroll */}
+        <div className="cat-table-scroll">
+        <table className="cat-table">
+        <thead>
+        <tr>
+        {columnas.map(col => (
+            <th key={col.key}>{col.label}</th>
+        ))}
+        <th style={{ textAlign:'right', paddingRight:20 }}>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td colSpan={columnas.length + 1} style={{ padding:0, border:'none' }}>
+        <div className="cat-empty">
+        <div className="cat-empty-icon">{tabActual.icon}</div>
+        <p className="cat-empty-title">Sin registros aún</p>
+        <p className="cat-empty-sub">
+        No hay {tabActual.label.toLowerCase()} cargados. Usa el botón
+        "Añadir registro" para crear el primero.
+        </p>
+        </div>
+        </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+        </motion.div>
+        </AnimatePresence>
+
+        {/* 👇 RENDERIZAMOS EL MODAL AQUÍ ABAJO */}
+        <ModalEscuela
+        isOpen={isModalEscuelaOpen}
+        onClose={() => setIsModalEscuelaOpen(false)}
+        onSave={handleGuardarEscuela}
+        />
+
+        </div>
+        </>
+    );
+}
